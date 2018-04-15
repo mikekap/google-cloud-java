@@ -152,14 +152,14 @@ final class Structs {
       builder.setNumberValue(((Number) obj).doubleValue());
     } else if (obj instanceof Boolean) {
       builder.setBoolValue((Boolean) obj);
+    } else if (obj instanceof Map) {
+      Map<String, Object> map = (Map<String, Object>) obj;
+      builder.setStructValue(newStruct(map));
     } else if (obj instanceof Iterable<?> || objClass.isArray()) {
       builder.setListValue(ListValue.newBuilder()
           .addAllValues(Iterables.transform(Types.iterableOf(obj), OBJECT_TO_VALUE)));
     } else if (objClass.isEnum()) {
       builder.setStringValue(((Enum<?>) obj).name());
-    } else if (obj instanceof Map) {
-      Map<String, Object> map = (Map<String, Object>) obj;
-      builder.setStructValue(newStruct(map));
     } else {
       throw new IllegalArgumentException(String.format("Unsupported protobuf value %s", obj));
     }

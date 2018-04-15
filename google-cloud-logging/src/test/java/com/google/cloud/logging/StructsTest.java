@@ -33,6 +33,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +77,20 @@ public class StructsTest {
   private static final Struct STRUCT = Struct.newBuilder().putAllFields(VALUE_MAP).build();
   private static final Map<String, Object> EMPTY_MAP = Collections.emptyMap();
 
+  // Clojure's Maps are Iterable.
+  private static final class IterableMap
+          extends HashMap<String, Object>
+          implements Iterable<Map.Entry<String, Object>> {
+    IterableMap(Map<String, Object> other) {
+      super(other);
+    }
+    @Override
+    public Iterator<Entry<String, Object>> iterator() {
+      return this.entrySet().iterator();
+    }
+  }
+  private static final Map<String, Object> MAP_WITH_ITERABLE_MAP = new HashMap<>();
+
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
@@ -92,6 +107,8 @@ public class StructsTest {
     MAP.put("boolean", BOOLEAN);
     MAP.put("list", LIST);
     MAP.put("struct", INNER_MAP);
+    MAP_WITH_ITERABLE_MAP.putAll(MAP);
+    MAP_WITH_ITERABLE_MAP.put("struct", new IterableMap(INNER_MAP));
   }
 
   private <T> void checkMapField(Map<String, T> map, String key, T expected) {
@@ -165,6 +182,18 @@ public class StructsTest {
   public void testNewStructNull() {
     thrown.expect(NullPointerException.class);
     Structs.newStruct(null);
+  }
+
+  @Test
+  public void testIterableMap() {
+    Struct struct = Structs.newStruct(MAP_WITH_ITERABLE_MAP);
+    checkStructField(struct, "null", NULL_VALUE);
+    checkStructField(struct, "number", NUMBER_VALUE);
+    checkStructField(struct, "string", STRING_VALUE);
+    checkStructField(struct, "boolean", BOOLEAN_VALUE);
+    checkStructField(struct, "list", LIST_VALUE);
+    checkStructField(struct, "struct", STRUCT_VALUE);
+    assertEquals(STRUCT, struct);
   }
 
   @Test
