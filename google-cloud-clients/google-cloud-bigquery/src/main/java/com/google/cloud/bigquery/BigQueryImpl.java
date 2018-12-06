@@ -39,7 +39,6 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.spi.v2.BigQueryRpc;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -176,10 +175,7 @@ final class BigQueryImpl extends BaseService<BigQueryOptions> implements BigQuer
   public Table create(TableInfo tableInfo, TableOption... options) {
     final com.google.api.services.bigquery.model.Table tablePb =
         tableInfo
-            .setProjectId(
-                Strings.isNullOrEmpty(tableInfo.getTableId().getProject())
-                    ? getOptions().getProjectId()
-                    : tableInfo.getTableId().getProject())
+            .setProjectId(getOptions().getProjectId())
             .toPb();
     final Map<BigQueryRpc.Option, ?> optionsMap = optionMap(options);
     try {
@@ -378,10 +374,7 @@ final class BigQueryImpl extends BaseService<BigQueryOptions> implements BigQuer
   @Override
   public boolean delete(TableId tableId) {
     final TableId completeTableId =
-        tableId.setProjectId(
-            Strings.isNullOrEmpty(tableId.getProject())
-                ? getOptions().getProjectId()
-                : tableId.getProject());
+        tableId.setProjectId(getOptions().getProjectId());
     try {
       return runWithRetries(
           new Callable<Boolean>() {
@@ -428,10 +421,7 @@ final class BigQueryImpl extends BaseService<BigQueryOptions> implements BigQuer
   public Table update(TableInfo tableInfo, TableOption... options) {
     final com.google.api.services.bigquery.model.Table tablePb =
         tableInfo
-            .setProjectId(
-                Strings.isNullOrEmpty(tableInfo.getTableId().getProject())
-                    ? getOptions().getProjectId()
-                    : tableInfo.getTableId().getProject())
+            .setProjectId(getOptions().getProjectId())
             .toPb();
     final Map<BigQueryRpc.Option, ?> optionsMap = optionMap(options);
     try {
@@ -461,10 +451,7 @@ final class BigQueryImpl extends BaseService<BigQueryOptions> implements BigQuer
   public Table getTable(TableId tableId, TableOption... options) {
     // More context about why this: https://github.com/googleapis/google-cloud-java/issues/3808
     final TableId completeTableId =
-        tableId.setProjectId(
-            Strings.isNullOrEmpty(tableId.getProject())
-                ? getOptions().getProjectId()
-                : tableId.getProject());
+        tableId.setProjectId(getOptions().getProjectId());
     final Map<BigQueryRpc.Option, ?> optionsMap = optionMap(options);
     try {
       com.google.api.services.bigquery.model.Table answer =

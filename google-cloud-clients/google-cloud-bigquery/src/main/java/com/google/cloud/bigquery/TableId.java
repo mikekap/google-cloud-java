@@ -95,9 +95,7 @@ public final class TableId implements Serializable {
   }
 
   TableId setProjectId(String projectId) {
-    Preconditions.checkArgument(
-        !Strings.isNullOrEmpty(projectId), "Provided projectId is null or empty");
-    return TableId.of(projectId, getDataset(), getTable());
+    return getProject() != null ? this : TableId.of(projectId, getDataset(), getTable());
   }
 
   TableReference toPb() {
